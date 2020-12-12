@@ -62,7 +62,6 @@ void main(void)
 
 DDRA= 0; // All input
 DDRB= 0xFF; // All output
-DDRC= 1;
 
 // For 10 ms - Timer0 Overflow:
 TCCR0= 0b00000101 ;

@@ -1,0 +1,9 @@
+VERSION:3 SOURCE_TIMESTAMP:518C8668
+NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\mega16.h"
+NODE:V LEVEL:0 LINE:27 "time_count_G000 -> RAM:????"
+NODE:C LEVEL:0 LINE:28 "NUM_LEDS -> FLASH"
+NODE:V LEVEL:0 LINE:29 "active_led -> R4,R5"
+NODE:V LEVEL:0 LINE:30 "direction -> R6,R7"
+NODE:F LEVEL:0 LINE:33 "toggle_leds(void)"
+NODE:F LEVEL:0 LINE:47 "timer0_ovf_isr(void)"
+NODE:F LEVEL:0 LINE:60 "main(void)"
