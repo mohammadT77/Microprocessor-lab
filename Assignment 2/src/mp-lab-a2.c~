@@ -47,16 +47,16 @@ char bcd_encode(int num){
 void timer0_tick_procedure(){
     unsigned int digit=timer;   
     int i;
-     
+               PORTD=3;
     if (active_port>=4)
         active_port = 0;
     PORTC = 0x0F & ~(1<<active_port);
                
-    for (i=0;i<active_port;i++){
-        digit = digit/10;
-    }
+    //for (i=0;i<active_port;i++){
+//        digit = digit/10;
+//    }
      
-    PORTD = bcd_encode(digit%10);
+  //  PORTD = bcd_encode(digit%10);
     
     active_port++;
 }
@@ -85,7 +85,7 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
     TCNT1L=0xC0;          
     ++timer1_count;                      
     
-    if (timer1_count==100) {  // Timer tick : 1s    
+    if (timer1_count==1000) {  // Timer tick : 1s    
         timer1_tick_procedure();    
         timer1_count=0;
     }
