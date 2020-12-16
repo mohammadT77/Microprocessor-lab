@@ -45,24 +45,35 @@ char bcd_encode(int num){
 }
 
 void timer0_tick_procedure(){
-     if (active_port>=4)
+    unsigned int digit=timer;   
+    int i;
+     
+    if (active_port>=4)
         active_port = 0;
-    PORTC = 0x0F & ~(1<<active_port); 
+    PORTC = 0x0F & ~(1<<active_port);
+               
+    for (i=0;i<active_port;i++){
+        digit = digit/10;
+    }
+     
+    PORTD = bcd_encode(digit%10);
+    
     active_port++;
 }
 
 void timer1_tick_procedure(){
-    PORTD = bcd_encode(timer++);
-    if (timer>=10)
-        timer=0;
+    timer++;
+    //PORTD = bcd_encode(timer++);
+    //if (timer>=10)
+    //    timer=0;
 }
 
 // Timer 0 overflow interrupt service routine
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
 
-    TCNT0=256-100; // Timer overflow : 0.1 ms                                  
-    //timer0_tick_procedure();
+    TCNT0=0;//256-255; // Timer overflow : 0.1 ms
+    timer0_tick_procedure();
     
 }
 
@@ -78,8 +89,6 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
         timer1_tick_procedure();    
         timer1_count=0;
     }
-
-
 }
 
 
@@ -98,8 +107,8 @@ PORTC=0xFE;
 // Mode: Normal top=0xFF
 // OC0 output: Disconnected
 // Timer Period: 0.1 ms
-TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (0<<CS00);
-TCNT0=256-100;
+TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (1<<CS02) | (0<<CS01) | (1<<CS00);
+TCNT0=0;//256-100;
 
 
 // Timer/Counter 1 initialization
@@ -115,9 +124,6 @@ TCNT1L=0xC0;
 
 // Timer(s)/Counter(s) Interrupt(s) initialization
 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
-
-//MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (0<<ISC00);
-//MCUCSR=(0<<ISC2);
 
 // Global enable interrupts
 #asm("sei")

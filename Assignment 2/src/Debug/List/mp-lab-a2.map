@@ -17,7 +17,8 @@ FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
 bcd_encode                                                                        0x00045     63
-timer1_tick_procedure                                                             0x00084     23
-timer0_ovf_isr                                                                    0x0009B      5
-timer1_ovf_isr                                                                    0x000A0     52
-main                                                                              0x000D4     23
+timer0_tick_procedure                                                             0x00084     58
+timer1_tick_procedure                                                             0x000BE      4
+timer0_ovf_isr                                                                    0x000C2      5
+timer1_ovf_isr                                                                    0x000C7     36
+main                                                                              0x000EB     22

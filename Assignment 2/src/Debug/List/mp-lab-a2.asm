@@ -1302,111 +1302,138 @@ _0x2000001:
 ;
 ;void timer0_tick_procedure(){
 ; 0000 002F void timer0_tick_procedure(){
-; 0000 0030      if (active_port>=4)
-; 0000 0031         active_port = 0;
-; 0000 0032     PORTC = 0x0F & ~(1<<active_port);
-; 0000 0033     active_port++;
-; 0000 0034 }
-;
-;void timer1_tick_procedure(){
-; 0000 0036 void timer1_tick_procedure(){
-_timer1_tick_procedure:
-; .FSTART _timer1_tick_procedure
-; 0000 0037     PORTD = bcd_encode(timer++);
-	LDI  R26,LOW(_timer_G000)
-	LDI  R27,HIGH(_timer_G000)
-	LD   R30,X+
-	LD   R31,X+
-	ADIW R30,1
-	ST   -X,R31
-	ST   -X,R30
-	SBIW R30,1
+_timer0_tick_procedure:
+; .FSTART _timer0_tick_procedure
+; 0000 0030     unsigned int digit=timer;
+; 0000 0031     int i;
+; 0000 0032 
+; 0000 0033     if (active_port>=4)
+	CALL __SAVELOCR4
+;	digit -> R16,R17
+;	i -> R18,R19
+	__GETWRMN 16,17,0,_timer_G000
+	LDS  R26,_active_port_G000
+	LDS  R27,_active_port_G000+1
+	SBIW R26,4
+	BRLT _0x10
+; 0000 0034         active_port = 0;
+	LDI  R30,LOW(0)
+	STS  _active_port_G000,R30
+	STS  _active_port_G000+1,R30
+; 0000 0035     PORTC = 0x0F & ~(1<<active_port);
+_0x10:
+	LDS  R30,_active_port_G000
+	LDI  R26,LOW(1)
+	CALL __LSLB12
+	COM  R30
+	ANDI R30,LOW(0xF)
+	OUT  0x15,R30
+; 0000 0036 
+; 0000 0037     for (i=0;i<active_port;i++){
+	__GETWRN 18,19,0
+_0x12:
+	LDS  R30,_active_port_G000
+	LDS  R31,_active_port_G000+1
+	CP   R18,R30
+	CPC  R19,R31
+	BRGE _0x13
+; 0000 0038         digit = digit/10;
+	MOVW R26,R16
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	CALL __DIVW21U
+	MOVW R16,R30
+; 0000 0039     }
+	__ADDWRN 18,19,1
+	RJMP _0x12
+_0x13:
+; 0000 003A 
+; 0000 003B     PORTD = bcd_encode(digit%10);
+	MOVW R26,R16
+	LDI  R30,LOW(10)
+	LDI  R31,HIGH(10)
+	CALL __MODW21U
 	MOVW R26,R30
 	RCALL _bcd_encode
 	OUT  0x12,R30
-; 0000 0038     if (timer>=10)
-	LDS  R26,_timer_G000
-	LDS  R27,_timer_G000+1
-	SBIW R26,10
-	BRLO _0x11
-; 0000 0039         timer=0;
-	LDI  R30,LOW(0)
-	STS  _timer_G000,R30
-	STS  _timer_G000+1,R30
-; 0000 003A }
-_0x11:
+; 0000 003C 
+; 0000 003D     active_port++;
+	LDI  R26,LOW(_active_port_G000)
+	LDI  R27,HIGH(_active_port_G000)
+	RCALL SUBOPT_0x0
+; 0000 003E }
+	CALL __LOADLOCR4
+	ADIW R28,4
+	RET
+; .FEND
+;
+;void timer1_tick_procedure(){
+; 0000 0040 void timer1_tick_procedure(){
+_timer1_tick_procedure:
+; .FSTART _timer1_tick_procedure
+; 0000 0041     timer++;
+	LDI  R26,LOW(_timer_G000)
+	LDI  R27,HIGH(_timer_G000)
+	RCALL SUBOPT_0x0
+; 0000 0042     //PORTD = bcd_encode(timer++);
+; 0000 0043     //if (timer>=10)
+; 0000 0044     //    timer=0;
+; 0000 0045 }
 	RET
 ; .FEND
 ;
 ;// Timer 0 overflow interrupt service routine
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0000 003E {
+; 0000 0049 {
 _timer0_ovf_isr:
 ; .FSTART _timer0_ovf_isr
-	ST   -Y,R30
-; 0000 003F 
-; 0000 0040     TCNT0=256-100; // Timer overflow : 0.1 ms
-	LDI  R30,LOW(156)
+	RCALL SUBOPT_0x1
+; 0000 004A 
+; 0000 004B     TCNT0=0;//256-255; // Timer overflow : 0.1 ms
+	LDI  R30,LOW(0)
 	OUT  0x32,R30
-; 0000 0041     //timer0_tick_procedure();
-; 0000 0042 
-; 0000 0043 }
-	LD   R30,Y+
-	RETI
+; 0000 004C     timer0_tick_procedure();
+	RCALL _timer0_tick_procedure
+; 0000 004D 
+; 0000 004E }
+	RJMP _0x19
 ; .FEND
 ;
 ;// Timer 1 overflow interrupt service routine
 ;interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-; 0000 0047 {
+; 0000 0052 {
 _timer1_ovf_isr:
 ; .FSTART _timer1_ovf_isr
-	ST   -Y,R0
-	ST   -Y,R1
-	ST   -Y,R15
-	ST   -Y,R22
-	ST   -Y,R23
-	ST   -Y,R24
-	ST   -Y,R25
-	ST   -Y,R26
-	ST   -Y,R27
-	ST   -Y,R30
-	ST   -Y,R31
-	IN   R30,SREG
-	ST   -Y,R30
-; 0000 0048 
-; 0000 0049     TCNT1H=0xE0;
+	RCALL SUBOPT_0x1
+; 0000 0053 
+; 0000 0054     TCNT1H=0xE0;
 	LDI  R30,LOW(224)
 	OUT  0x2D,R30
-; 0000 004A     TCNT1L=0xC0;
+; 0000 0055     TCNT1L=0xC0;
 	LDI  R30,LOW(192)
 	OUT  0x2C,R30
-; 0000 004B     ++timer1_count;
+; 0000 0056     ++timer1_count;
 	LDI  R26,LOW(_timer1_count_G000)
 	LDI  R27,HIGH(_timer1_count_G000)
-	LD   R30,X+
-	LD   R31,X+
-	ADIW R30,1
-	ST   -X,R31
-	ST   -X,R30
-; 0000 004C 
-; 0000 004D     if (timer1_count==1000) {  // Timer tick : 1s
+	RCALL SUBOPT_0x0
+; 0000 0057 
+; 0000 0058     if (timer1_count==1000) {  // Timer tick : 1s
 	LDS  R26,_timer1_count_G000
 	LDS  R27,_timer1_count_G000+1
 	CPI  R26,LOW(0x3E8)
 	LDI  R30,HIGH(0x3E8)
 	CPC  R27,R30
-	BRNE _0x12
-; 0000 004E         timer1_tick_procedure();
+	BRNE _0x14
+; 0000 0059         timer1_tick_procedure();
 	RCALL _timer1_tick_procedure
-; 0000 004F         timer1_count=0;
+; 0000 005A         timer1_count=0;
 	LDI  R30,LOW(0)
 	STS  _timer1_count_G000,R30
 	STS  _timer1_count_G000+1,R30
-; 0000 0050     }
-; 0000 0051 
-; 0000 0052 
-; 0000 0053 }
-_0x12:
+; 0000 005B     }
+; 0000 005C }
+_0x14:
+_0x19:
 	LD   R30,Y+
 	OUT  SREG,R30
 	LD   R31,Y+
@@ -1425,73 +1452,69 @@ _0x12:
 ;
 ;
 ;void main(void)
-; 0000 0057 {
+; 0000 0060 {
 _main:
 ; .FSTART _main
-; 0000 0058 // Declare your local variables here
-; 0000 0059 
-; 0000 005A DDRC= 0x0F;
+; 0000 0061 // Declare your local variables here
+; 0000 0062 
+; 0000 0063 DDRC= 0x0F;
 	LDI  R30,LOW(15)
 	OUT  0x14,R30
-; 0000 005B DDRD= 0xFF;
+; 0000 0064 DDRD= 0xFF;
 	LDI  R30,LOW(255)
 	OUT  0x11,R30
-; 0000 005C 
-; 0000 005D PORTC=0xFE;
+; 0000 0065 
+; 0000 0066 PORTC=0xFE;
 	LDI  R30,LOW(254)
 	OUT  0x15,R30
-; 0000 005E 
-; 0000 005F // Timer/Counter 0 initialization
-; 0000 0060 // Clock source: System Clock
-; 0000 0061 // Clock value: 1000.000 kHz
-; 0000 0062 // Mode: Normal top=0xFF
-; 0000 0063 // OC0 output: Disconnected
-; 0000 0064 // Timer Period: 0.1 ms
-; 0000 0065 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (0<<CS00);
-	LDI  R30,LOW(2)
-	OUT  0x33,R30
-; 0000 0066 TCNT0=256-100;
-	LDI  R30,LOW(156)
-	OUT  0x32,R30
 ; 0000 0067 
-; 0000 0068 
-; 0000 0069 // Timer/Counter 1 initialization
-; 0000 006A // Clock source: System Clock
-; 0000 006B // Clock value: 8000.000 kHz
-; 0000 006C // Mode: Normal top=0xFFFF
-; 0000 006D // Timer Period: 1 ms
-; 0000 006E // Timer1 Overflow Interrupt: On
-; 0000 006F TCCR1A=(0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0) | (0<<WGM11) | (0<<WGM10);
+; 0000 0068 // Timer/Counter 0 initialization
+; 0000 0069 // Clock source: System Clock
+; 0000 006A // Clock value: 1000.000 kHz
+; 0000 006B // Mode: Normal top=0xFF
+; 0000 006C // OC0 output: Disconnected
+; 0000 006D // Timer Period: 0.1 ms
+; 0000 006E TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (1<<CS02) | (0<<CS01) | (1<<CS00);
+	LDI  R30,LOW(5)
+	OUT  0x33,R30
+; 0000 006F TCNT0=0;//256-100;
 	LDI  R30,LOW(0)
+	OUT  0x32,R30
+; 0000 0070 
+; 0000 0071 
+; 0000 0072 // Timer/Counter 1 initialization
+; 0000 0073 // Clock source: System Clock
+; 0000 0074 // Clock value: 8000.000 kHz
+; 0000 0075 // Mode: Normal top=0xFFFF
+; 0000 0076 // Timer Period: 1 ms
+; 0000 0077 // Timer1 Overflow Interrupt: On
+; 0000 0078 TCCR1A=(0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0) | (0<<WGM11) | (0<<WGM10);
 	OUT  0x2F,R30
-; 0000 0070 TCCR1B=(0<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (0<<WGM12) | (0<<CS12) | (0<<CS11) | (1<<CS10);
+; 0000 0079 TCCR1B=(0<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (0<<WGM12) | (0<<CS12) | (0<<CS11) | (1<<CS10);
 	LDI  R30,LOW(1)
 	OUT  0x2E,R30
-; 0000 0071 TCNT1H=0xE0;
+; 0000 007A TCNT1H=0xE0;
 	LDI  R30,LOW(224)
 	OUT  0x2D,R30
-; 0000 0072 TCNT1L=0xC0;
+; 0000 007B TCNT1L=0xC0;
 	LDI  R30,LOW(192)
 	OUT  0x2C,R30
-; 0000 0073 
-; 0000 0074 // Timer(s)/Counter(s) Interrupt(s) initialization
-; 0000 0075 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+; 0000 007C 
+; 0000 007D // Timer(s)/Counter(s) Interrupt(s) initialization
+; 0000 007E TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
 	LDI  R30,LOW(5)
 	OUT  0x39,R30
-; 0000 0076 
-; 0000 0077 //MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (0<<ISC00);
-; 0000 0078 //MCUCSR=(0<<ISC2);
-; 0000 0079 
-; 0000 007A // Global enable interrupts
-; 0000 007B #asm("sei")
+; 0000 007F 
+; 0000 0080 // Global enable interrupts
+; 0000 0081 #asm("sei")
 	sei
-; 0000 007C 
-; 0000 007D while (1);
-_0x13:
-	RJMP _0x13
-; 0000 007E }
-_0x16:
-	RJMP _0x16
+; 0000 0082 
+; 0000 0083 while (1);
+_0x15:
+	RJMP _0x15
+; 0000 0084 }
+_0x18:
+	RJMP _0x18
 ; .FEND
 
 	.DSEG
@@ -1503,7 +1526,92 @@ _timer_G000:
 	.BYTE 0x2
 
 	.CSEG
+;OPTIMIZER ADDED SUBROUTINE, CALLED 3 TIMES, CODE SIZE REDUCTION:3 WORDS
+SUBOPT_0x0:
+	LD   R30,X+
+	LD   R31,X+
+	ADIW R30,1
+	ST   -X,R31
+	ST   -X,R30
+	RET
+
+;OPTIMIZER ADDED SUBROUTINE, CALLED 2 TIMES, CODE SIZE REDUCTION:8 WORDS
+SUBOPT_0x1:
+	ST   -Y,R0
+	ST   -Y,R1
+	ST   -Y,R15
+	ST   -Y,R22
+	ST   -Y,R23
+	ST   -Y,R24
+	ST   -Y,R25
+	ST   -Y,R26
+	ST   -Y,R27
+	ST   -Y,R30
+	ST   -Y,R31
+	IN   R30,SREG
+	ST   -Y,R30
+	RET
+
 
 	.CSEG
+__LSLB12:
+	TST  R30
+	MOV  R0,R30
+	MOV  R30,R26
+	BREQ __LSLB12R
+__LSLB12L:
+	LSL  R30
+	DEC  R0
+	BRNE __LSLB12L
+__LSLB12R:
+	RET
+
+__DIVW21U:
+	CLR  R0
+	CLR  R1
+	LDI  R25,16
+__DIVW21U1:
+	LSL  R26
+	ROL  R27
+	ROL  R0
+	ROL  R1
+	SUB  R0,R30
+	SBC  R1,R31
+	BRCC __DIVW21U2
+	ADD  R0,R30
+	ADC  R1,R31
+	RJMP __DIVW21U3
+__DIVW21U2:
+	SBR  R26,1
+__DIVW21U3:
+	DEC  R25
+	BRNE __DIVW21U1
+	MOVW R30,R26
+	MOVW R26,R0
+	RET
+
+__MODW21U:
+	RCALL __DIVW21U
+	MOVW R30,R26
+	RET
+
+__SAVELOCR4:
+	ST   -Y,R19
+__SAVELOCR3:
+	ST   -Y,R18
+__SAVELOCR2:
+	ST   -Y,R17
+	ST   -Y,R16
+	RET
+
+__LOADLOCR4:
+	LDD  R19,Y+3
+__LOADLOCR3:
+	LDD  R18,Y+2
+__LOADLOCR2:
+	LDD  R17,Y+1
+	LD   R16,Y
+	RET
+
 ;END OF CODE MARKER
 __END_OF_CODE:
