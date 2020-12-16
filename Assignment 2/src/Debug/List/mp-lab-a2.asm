@@ -1199,86 +1199,243 @@ __CLEAR_SRAM:
 	#endif
 ;
 ;// Declare your global variables here
+;static unsigned int timer_count = 0;
+;static unsigned int timer = 0;
+;
+;char bcd_encode(int num){
+; 0000 001E char bcd_encode(int num){
+
+	.CSEG
+_bcd_encode:
+; .FSTART _bcd_encode
+; 0000 001F     switch (num){
+	ST   -Y,R27
+	ST   -Y,R26
+;	num -> Y+0
+	LD   R30,Y
+	LDD  R31,Y+1
+; 0000 0020      case 0:    return 0b0111111;
+	SBIW R30,0
+	BRNE _0x6
+	LDI  R30,LOW(63)
+	RJMP _0x2000001
+; 0000 0021      case 1:    return 0b0000110;
+_0x6:
+	CPI  R30,LOW(0x1)
+	LDI  R26,HIGH(0x1)
+	CPC  R31,R26
+	BRNE _0x7
+	LDI  R30,LOW(6)
+	RJMP _0x2000001
+; 0000 0022      case 2:    return 0b1011011;
+_0x7:
+	CPI  R30,LOW(0x2)
+	LDI  R26,HIGH(0x2)
+	CPC  R31,R26
+	BRNE _0x8
+	LDI  R30,LOW(91)
+	RJMP _0x2000001
+; 0000 0023      case 3:    return 0b1001111;
+_0x8:
+	CPI  R30,LOW(0x3)
+	LDI  R26,HIGH(0x3)
+	CPC  R31,R26
+	BRNE _0x9
+	LDI  R30,LOW(79)
+	RJMP _0x2000001
+; 0000 0024      case 4:    return 0b1100110;
+_0x9:
+	CPI  R30,LOW(0x4)
+	LDI  R26,HIGH(0x4)
+	CPC  R31,R26
+	BRNE _0xA
+	LDI  R30,LOW(102)
+	RJMP _0x2000001
+; 0000 0025      case 5:    return 0b1101101;
+_0xA:
+	CPI  R30,LOW(0x5)
+	LDI  R26,HIGH(0x5)
+	CPC  R31,R26
+	BRNE _0xB
+	LDI  R30,LOW(109)
+	RJMP _0x2000001
+; 0000 0026      case 6:    return 0b1111101;
+_0xB:
+	CPI  R30,LOW(0x6)
+	LDI  R26,HIGH(0x6)
+	CPC  R31,R26
+	BRNE _0xC
+	LDI  R30,LOW(125)
+	RJMP _0x2000001
+; 0000 0027      case 7:    return 0b0000000;
+_0xC:
+	CPI  R30,LOW(0x7)
+	LDI  R26,HIGH(0x7)
+	CPC  R31,R26
+	BRNE _0xD
+	LDI  R30,LOW(0)
+	RJMP _0x2000001
+; 0000 0028      case 8:    return 0b0111111;
+_0xD:
+	CPI  R30,LOW(0x8)
+	LDI  R26,HIGH(0x8)
+	CPC  R31,R26
+	BRNE _0xE
+	LDI  R30,LOW(63)
+	RJMP _0x2000001
+; 0000 0029      case 9:    return 0b1111111;
+_0xE:
+	CPI  R30,LOW(0x9)
+	LDI  R26,HIGH(0x9)
+	CPC  R31,R26
+	BRNE _0x5
+	LDI  R30,LOW(127)
+; 0000 002A     }
+_0x5:
+; 0000 002B }
+_0x2000001:
+	ADIW R28,2
+	RET
+; .FEND
+;
+;void timer_tick_procedure(){
+; 0000 002D void timer_tick_procedure(){
+_timer_tick_procedure:
+; .FSTART _timer_tick_procedure
+; 0000 002E 
+; 0000 002F }
+	RET
+; .FEND
 ;
 ;// Timer 0 overflow interrupt service routine
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0000 001E {
-
-	.CSEG
+; 0000 0033 {
 _timer0_ovf_isr:
 ; .FSTART _timer0_ovf_isr
+	ST   -Y,R0
+	ST   -Y,R1
+	ST   -Y,R15
+	ST   -Y,R22
+	ST   -Y,R23
+	ST   -Y,R24
+	ST   -Y,R25
+	ST   -Y,R26
+	ST   -Y,R27
 	ST   -Y,R30
-; 0000 001F 
-; 0000 0020     TCNT0=0x9C;
+	ST   -Y,R31
+	IN   R30,SREG
+	ST   -Y,R30
+; 0000 0034 
+; 0000 0035     TCNT0=0x9C; // Timer overflow : 1 ms
 	LDI  R30,LOW(156)
 	OUT  0x32,R30
-; 0000 0021 
-; 0000 0022 
-; 0000 0023 
-; 0000 0024 }
+; 0000 0036     ++timer_count;
+	LDI  R26,LOW(_timer_count_G000)
+	LDI  R27,HIGH(_timer_count_G000)
+	LD   R30,X+
+	LD   R31,X+
+	ADIW R30,1
+	ST   -X,R31
+	ST   -X,R30
+; 0000 0037 
+; 0000 0038     if (timer_count==1000) {  // Timer tick : 1s
+	LDS  R26,_timer_count_G000
+	LDS  R27,_timer_count_G000+1
+	CPI  R26,LOW(0x3E8)
+	LDI  R30,HIGH(0x3E8)
+	CPC  R27,R30
+	BRNE _0x10
+; 0000 0039         timer_tick_procedure();
+	RCALL _timer_tick_procedure
+; 0000 003A         //PORTD = bcd_encode(++timer);
+; 0000 003B         timer_count=0;
+	LDI  R30,LOW(0)
+	STS  _timer_count_G000,R30
+	STS  _timer_count_G000+1,R30
+; 0000 003C     }
+; 0000 003D 
+; 0000 003E 
+; 0000 003F }
+_0x10:
 	LD   R30,Y+
+	OUT  SREG,R30
+	LD   R31,Y+
+	LD   R30,Y+
+	LD   R27,Y+
+	LD   R26,Y+
+	LD   R25,Y+
+	LD   R24,Y+
+	LD   R23,Y+
+	LD   R22,Y+
+	LD   R15,Y+
+	LD   R1,Y+
+	LD   R0,Y+
 	RETI
 ; .FEND
 ;
 ;void main(void)
-; 0000 0027 {
+; 0000 0042 {
 _main:
 ; .FSTART _main
-; 0000 0028 // Declare your local variables here
-; 0000 0029 
-; 0000 002A DDRC= 0xFF;
-	LDI  R30,LOW(255)
-	OUT  0x14,R30
-; 0000 002B PORTC= 0;
-	LDI  R30,LOW(0)
-	OUT  0x15,R30
-; 0000 002C 
-; 0000 002D DDRD= 0x0F;
+; 0000 0043 // Declare your local variables here
+; 0000 0044 
+; 0000 0045 DDRC= 0x0F;
 	LDI  R30,LOW(15)
+	OUT  0x14,R30
+; 0000 0046 DDRD= 0xFF;
+	LDI  R30,LOW(255)
 	OUT  0x11,R30
-; 0000 002E PORTD= 0;
-	LDI  R30,LOW(0)
-	OUT  0x12,R30
-; 0000 002F 
-; 0000 0030 // Timer/Counter 0 initialization
-; 0000 0031 // Clock source: System Clock
-; 0000 0032 // Clock value: 1000.000 kHz
-; 0000 0033 // Mode: Normal top=0xFF
-; 0000 0034 // OC0 output: Disconnected
-; 0000 0035 // Timer Period: 0.1 ms
-; 0000 0036 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (0<<CS00);
+; 0000 0047 
+; 0000 0048 // Timer/Counter 0 initialization
+; 0000 0049 // Clock source: System Clock
+; 0000 004A // Clock value: 1000.000 kHz
+; 0000 004B // Mode: Normal top=0xFF
+; 0000 004C // OC0 output: Disconnected
+; 0000 004D // Timer Period: 0.1 ms
+; 0000 004E TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (0<<CS00);
 	LDI  R30,LOW(2)
 	OUT  0x33,R30
-; 0000 0037 TCNT0=0x9C;
+; 0000 004F TCNT0=0x9C;
 	LDI  R30,LOW(156)
 	OUT  0x32,R30
-; 0000 0038 OCR0=0x00;
+; 0000 0050 OCR0=0x00;
 	LDI  R30,LOW(0)
 	OUT  0x3C,R30
-; 0000 0039 
-; 0000 003A // Timer(s)/Counter(s) Interrupt(s) initialization
-; 0000 003B TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+; 0000 0051 
+; 0000 0052 // Timer(s)/Counter(s) Interrupt(s) initialization
+; 0000 0053 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
 	LDI  R30,LOW(1)
 	OUT  0x39,R30
-; 0000 003C 
-; 0000 003D //MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (0<<ISC00);
-; 0000 003E //MCUCSR=(0<<ISC2);
-; 0000 003F 
-; 0000 0040 // Global enable interrupts
-; 0000 0041 #asm("sei")
+; 0000 0054 
+; 0000 0055 //MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (0<<ISC00);
+; 0000 0056 //MCUCSR=(0<<ISC2);
+; 0000 0057 
+; 0000 0058 // Global enable interrupts
+; 0000 0059 #asm("sei")
 	sei
-; 0000 0042 
-; 0000 0043 while (1)
-_0x3:
-; 0000 0044       {
-; 0000 0045       // Place your code here
-; 0000 0046 
-; 0000 0047       }
-	RJMP _0x3
-; 0000 0048 }
-_0x6:
-	RJMP _0x6
+; 0000 005A 
+; 0000 005B while (1)
+_0x11:
+; 0000 005C       {
+; 0000 005D       // Place your code here
+; 0000 005E         PORTC = 0;
+	LDI  R30,LOW(0)
+	OUT  0x15,R30
+; 0000 005F         PORTD = bcd_encode(6);
+	LDI  R26,LOW(6)
+	LDI  R27,0
+	RCALL _bcd_encode
+	OUT  0x12,R30
+; 0000 0060       }
+	RJMP _0x11
+; 0000 0061 }
+_0x14:
+	RJMP _0x14
 ; .FEND
+
+	.DSEG
+_timer_count_G000:
+	.BYTE 0x2
 
 	.CSEG
 

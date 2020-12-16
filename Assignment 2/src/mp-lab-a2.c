@@ -24,13 +24,40 @@ Data Stack size         : 256
 #include <mega16.h>
 
 // Declare your global variables here
+static unsigned int timer_count = 0;
+static unsigned int timer = 0;
+
+char bcd_encode(int num){
+    switch (num){
+     case 0:    return 0b0111111;
+     case 1:    return 0b0000110;
+     case 2:    return 0b1011011;
+     case 3:    return 0b1001111;
+     case 4:    return 0b1100110;
+     case 5:    return 0b1101101;
+     case 6:    return 0b1111101;
+     case 7:    return 0b0000000;
+     case 8:    return 0b0111111;
+     case 9:    return 0b1111111;
+    }
+}
+
+void timer_tick_procedure(){
+    
+}
 
 // Timer 0 overflow interrupt service routine
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
 
-    TCNT0=0x9C;
+    TCNT0=0x9C; // Timer overflow : 1 ms            
+    ++timer_count;                      
     
+    if (timer_count==1000) {  // Timer tick : 1s    
+        timer_tick_procedure();    
+        //PORTD = bcd_encode(++timer);
+        timer_count=0;
+    }
 
 
 }
@@ -39,11 +66,8 @@ void main(void)
 {
 // Declare your local variables here
 
-DDRC= 0xFF; 
-PORTC= 0;
-
-DDRD= 0x0F; 
-PORTD= 0; 
+DDRC= 0x0F; 
+DDRD= 0xFF; 
 
 // Timer/Counter 0 initialization
 // Clock source: System Clock
@@ -67,6 +91,7 @@ TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TO
 while (1)
       {
       // Place your code here
-
+        PORTC = 0;        
+        PORTD = bcd_encode(6);
       }
 }
