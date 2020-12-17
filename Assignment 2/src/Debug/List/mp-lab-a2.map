@@ -1,9 +1,9 @@
 RAM Allocation [bytes]
 Variable                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
-timer1_count                                                                      0x0160       2
-active_port                                                                       0x0162       2
-timer                                                                             0x0164       2
+active_port                                                                       0x0160       2
+timer                                                                             0x0162       2
+timer_array                                                                       0x0164       4
 
 EEPROM Allocation [bytes]
 Variable                                                                          Address   Size
@@ -17,8 +17,8 @@ FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
 bcd_encode                                                                        0x00045     63
-timer0_tick_procedure                                                             0x00084     58
-timer1_tick_procedure                                                             0x000BE      4
-timer0_ovf_isr                                                                    0x000C2      5
-timer1_ovf_isr                                                                    0x000C7     36
-main                                                                              0x000EB     22
+timer0_tick_procedure                                                             0x00084     37
+timer1_tick_procedure                                                             0x000A9     43
+timer0_ovf_isr                                                                    0x000D4      5
+timer1_ovf_isr                                                                    0x000D9     20
+main                                                                              0x000ED     29

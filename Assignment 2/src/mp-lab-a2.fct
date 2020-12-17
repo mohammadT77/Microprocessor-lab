@@ -1,4 +1,3 @@
-main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a2.c" LINE:95
-timer0_ovf_isr DSTACK_USAGE:12 DSTACK_LEVEL:12 FILE:"mp-lab-a2.c" LINE:72
-timer0_tick_procedure DSTACK_USAGE:4 DSTACK_LEVEL:16 FILE:"mp-lab-a2.c" LINE:47
-bcd_encode DSTACK_USAGE:2 DSTACK_LEVEL:18 FILE:"mp-lab-a2.c" LINE:32
+main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a2.c" LINE:103
+timer1_ovf_isr DSTACK_USAGE:12 DSTACK_LEVEL:12 FILE:"mp-lab-a2.c" LINE:95
+timer1_tick_procedure DSTACK_USAGE:4 DSTACK_LEVEL:16 FILE:"mp-lab-a2.c" LINE:75
