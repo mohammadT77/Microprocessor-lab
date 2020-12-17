@@ -1,4 +1,4 @@
-VERSION:3 SOURCE_TIMESTAMP:5191594B
+VERSION:3 SOURCE_TIMESTAMP:519159B5
 NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\mega16.h"
 NODE:C LEVEL:0 LINE:42 "TIMER0_VALUE -> FLASH"
 NODE:C LEVEL:0 LINE:43 "TIMER1_VALUE -> FLASH"
@@ -8,6 +8,6 @@ NODE:V LEVEL:0 LINE:48 "timer_array -> RAM:????"
 NODE:F LEVEL:0 LINE:50 "bcd_encode(int num)"
 NODE:F LEVEL:0 LINE:65 "timer0_tick_procedure(void)"
 NODE:F LEVEL:0 LINE:75 "timer1_tick_procedure(void)"
-NODE:F LEVEL:0 LINE:86 "timer0_ovf_isr(void)"
-NODE:F LEVEL:0 LINE:95 "timer1_ovf_isr(void)"
-NODE:F LEVEL:0 LINE:103 "main(void)"
+NODE:F LEVEL:0 LINE:88 "timer0_ovf_isr(void)"
+NODE:F LEVEL:0 LINE:97 "timer1_ovf_isr(void)"
+NODE:F LEVEL:0 LINE:105 "main(void)"

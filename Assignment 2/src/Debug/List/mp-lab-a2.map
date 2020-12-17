@@ -18,7 +18,7 @@ Function                                                                        
 ------------------------------------------------------------------------------------------------
 bcd_encode                                                                        0x00045     63
 timer0_tick_procedure                                                             0x00084     37
-timer1_tick_procedure                                                             0x000A9     43
-timer0_ovf_isr                                                                    0x000D4      5
-timer1_ovf_isr                                                                    0x000D9     20
-main                                                                              0x000ED     29
+timer1_tick_procedure                                                             0x000A9     56
+timer0_ovf_isr                                                                    0x000E1      5
+timer1_ovf_isr                                                                    0x000E6     20
+main                                                                              0x000FA     29

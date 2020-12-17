@@ -1379,13 +1379,25 @@ _timer1_tick_procedure:
 	ADIW R30,1
 	ST   -X,R31
 	ST   -X,R30
-; 0000 004E 
-; 0000 004F     for (i=0;i<4;i++){
+; 0000 004E     if (timer>9999)
+	LDS  R26,_timer_G000
+	LDS  R27,_timer_G000+1
+	CPI  R26,LOW(0x2710)
+	LDI  R30,HIGH(0x2710)
+	CPC  R27,R30
+	BRLO _0x11
+; 0000 004F         timer =0;
+	LDI  R30,LOW(0)
+	STS  _timer_G000,R30
+	STS  _timer_G000+1,R30
+; 0000 0050 
+; 0000 0051     for (i=0;i<4;i++){
+_0x11:
 	__GETWRN 16,17,0
-_0x12:
+_0x13:
 	__CPWRN 16,17,4
-	BRGE _0x13
-; 0000 0050         timer_array[i] = digit%10;
+	BRGE _0x14
+; 0000 0052         timer_array[i] = digit%10;
 	MOVW R30,R16
 	SUBI R30,LOW(-_timer_array)
 	SBCI R31,HIGH(-_timer_array)
@@ -1396,17 +1408,17 @@ _0x12:
 	CALL __MODW21
 	MOVW R26,R22
 	ST   X,R30
-; 0000 0051         digit /= 10;
+; 0000 0053         digit /= 10;
 	MOVW R26,R18
 	LDI  R30,LOW(10)
 	LDI  R31,HIGH(10)
 	CALL __DIVW21
 	MOVW R18,R30
-; 0000 0052     }
+; 0000 0054     }
 	__ADDWRN 16,17,1
-	RJMP _0x12
-_0x13:
-; 0000 0053 }
+	RJMP _0x13
+_0x14:
+; 0000 0055 }
 	CALL __LOADLOCR4
 	ADIW R28,4
 	RET
@@ -1414,37 +1426,37 @@ _0x13:
 ;
 ;// Timer 0 overflow interrupt service routine
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0000 0057 {
+; 0000 0059 {
 _timer0_ovf_isr:
 ; .FSTART _timer0_ovf_isr
 	RCALL SUBOPT_0x0
-; 0000 0058 
-; 0000 0059     TCNT0= 0xFF - TIMER0_VALUE;
+; 0000 005A 
+; 0000 005B     TCNT0= 0xFF - TIMER0_VALUE;
 	LDI  R30,LOW(255)
 	OUT  0x32,R30
-; 0000 005A     timer0_tick_procedure();
+; 0000 005C     timer0_tick_procedure();
 	RCALL _timer0_tick_procedure
-; 0000 005B 
-; 0000 005C }
-	RJMP _0x18
+; 0000 005D 
+; 0000 005E }
+	RJMP _0x19
 ; .FEND
 ;
 ;// Timer 1 overflow interrupt service routine
 ;interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-; 0000 0060 {
+; 0000 0062 {
 _timer1_ovf_isr:
 ; .FSTART _timer1_ovf_isr
 	RCALL SUBOPT_0x0
-; 0000 0061 
-; 0000 0062     TCNT1 = 0xFFFF - TIMER1_VALUE;
+; 0000 0063 
+; 0000 0064     TCNT1 = 0xFFFF - TIMER1_VALUE;
 	LDI  R30,LOW(34286)
 	LDI  R31,HIGH(34286)
 	OUT  0x2C+1,R31
 	OUT  0x2C,R30
-; 0000 0063     timer1_tick_procedure();
+; 0000 0065     timer1_tick_procedure();
 	RCALL _timer1_tick_procedure
-; 0000 0064 }
-_0x18:
+; 0000 0066 }
+_0x19:
 	LD   R30,Y+
 	OUT  SREG,R30
 	LD   R31,Y+
@@ -1463,76 +1475,76 @@ _0x18:
 ;
 ;
 ;void main(void)
-; 0000 0068 {
+; 0000 006A {
 _main:
 ; .FSTART _main
-; 0000 0069 // Declare your local variables here
-; 0000 006A 
-; 0000 006B DDRC= 0x0F;
+; 0000 006B // Declare your local variables here
+; 0000 006C 
+; 0000 006D DDRC= 0x0F;
 	LDI  R30,LOW(15)
 	OUT  0x14,R30
-; 0000 006C DDRD= 0xFF;
+; 0000 006E DDRD= 0xFF;
 	LDI  R30,LOW(255)
 	OUT  0x11,R30
-; 0000 006D 
-; 0000 006E PORTC=0xFE;
+; 0000 006F 
+; 0000 0070 PORTC=0xFE;
 	LDI  R30,LOW(254)
 	OUT  0x15,R30
-; 0000 006F 
-; 0000 0070 // Timer/Counter 0 initialization
-; 0000 0071 // Clock source: System Clock
-; 0000 0072 // Clock value: 7812 Hz
-; 0000 0073 // Mode: Normal top=0xFF
-; 0000 0074 // OC0 output: Disconnected
-; 0000 0075 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (1<<CS02) | (0<<CS01) | (1<<CS00);
+; 0000 0071 
+; 0000 0072 // Timer/Counter 0 initialization
+; 0000 0073 // Clock source: System Clock
+; 0000 0074 // Clock value: 7812 Hz
+; 0000 0075 // Mode: Normal top=0xFF
+; 0000 0076 // OC0 output: Disconnected
+; 0000 0077 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (1<<CS02) | (0<<CS01) | (1<<CS00);
 	LDI  R30,LOW(5)
 	OUT  0x33,R30
-; 0000 0076 TCNT0=0xFF - TIMER0_VALUE;
+; 0000 0078 TCNT0=0xFF - TIMER0_VALUE;
 	LDI  R30,LOW(255)
 	OUT  0x32,R30
-; 0000 0077 
-; 0000 0078 
 ; 0000 0079 
-; 0000 007A // Timer/Counter 1 initialization
-; 0000 007B // Clock source: System Clock
-; 0000 007C // Clock value: 31.250 kHz
-; 0000 007D // Timer Period: 1 s
-; 0000 007E // Timer1 Overflow Interrupt: On
-; 0000 007F TCCR1A=(0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0) | (0<<WGM11) | (0<<WGM10);
+; 0000 007A 
+; 0000 007B 
+; 0000 007C // Timer/Counter 1 initialization
+; 0000 007D // Clock source: System Clock
+; 0000 007E // Clock value: 31.250 kHz
+; 0000 007F // Timer Period: 1 s
+; 0000 0080 // Timer1 Overflow Interrupt: On
+; 0000 0081 TCCR1A=(0<<COM1A1) | (0<<COM1A0) | (0<<COM1B1) | (0<<COM1B0) | (0<<WGM11) | (0<<WGM10);
 	LDI  R30,LOW(0)
 	OUT  0x2F,R30
-; 0000 0080 TCCR1B=(0<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (0<<WGM12) | (1<<CS12) | (0<<CS11) | (0<<CS10);
+; 0000 0082 TCCR1B=(0<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (0<<WGM12) | (1<<CS12) | (0<<CS11) | (0<<CS10);
 	LDI  R30,LOW(4)
 	OUT  0x2E,R30
-; 0000 0081 
-; 0000 0082 //TCNT1H=0xE0;
-; 0000 0083 //TCNT1L=0xC0;
-; 0000 0084 TCNT1 = 0xFFFF - TIMER1_VALUE;
+; 0000 0083 
+; 0000 0084 //TCNT1H=0xE0;
+; 0000 0085 //TCNT1L=0xC0;
+; 0000 0086 TCNT1 = 0xFFFF - TIMER1_VALUE;
 	LDI  R30,LOW(34286)
 	LDI  R31,HIGH(34286)
 	OUT  0x2C+1,R31
 	OUT  0x2C,R30
-; 0000 0085 
-; 0000 0086 // Timer(s)/Counter(s) Interrupt(s) initialization
-; 0000 0087 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+; 0000 0087 
+; 0000 0088 // Timer(s)/Counter(s) Interrupt(s) initialization
+; 0000 0089 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
 	LDI  R30,LOW(5)
 	OUT  0x39,R30
-; 0000 0088 
-; 0000 0089 // Global enable interrupts
-; 0000 008A #asm("sei")
+; 0000 008A 
+; 0000 008B // Global enable interrupts
+; 0000 008C #asm("sei")
 	sei
-; 0000 008B 
-; 0000 008C timer = 1;
+; 0000 008D 
+; 0000 008E timer = 1;
 	LDI  R30,LOW(1)
 	LDI  R31,HIGH(1)
 	STS  _timer_G000,R30
 	STS  _timer_G000+1,R31
-; 0000 008D while (1);
-_0x14:
-	RJMP _0x14
-; 0000 008E }
-_0x17:
-	RJMP _0x17
+; 0000 008F while (1);
+_0x15:
+	RJMP _0x15
+; 0000 0090 }
+_0x18:
+	RJMP _0x18
 ; .FEND
 
 	.DSEG

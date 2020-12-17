@@ -74,7 +74,9 @@ void timer0_tick_procedure(){
 
 void timer1_tick_procedure(){
     int i,digit=timer;
-    timer++;
+    timer++;  
+    if (timer>9999)
+        timer =0;
     
     for (i=0;i<4;i++){
         timer_array[i] = digit%10;
