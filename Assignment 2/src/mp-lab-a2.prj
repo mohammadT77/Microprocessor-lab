@@ -8,9 +8,9 @@ C=
 D=12/16/2020
 Files=1
 F1=mp-lab-a2.c
-OpenedFiles=1
+OpenedFiles=2
 OF1=mp-lab-a2.c
-Active1=1
+Active1=0
 DebugOutputListFilesDirectory=Debug\List
 DebugOutputObjectFilesDirectory=Debug
 DebugOutputExecutableFilesDirectory=Debug\Exe
@@ -29,6 +29,11 @@ PageIndex0=0
 EditorPanel1=0
 TimeStamp1=1368480181
 PageIndex1=1
+OF2=..\..\Assignment 3\src\mp-lab-a3.c
+Active2=1
+EditorPanel2=0
+TimeStamp2=1368879283
+PageIndex2=2
 [CompilerDebug]
 Chip=ATmega16
 CPUClock=8000000
@@ -372,16 +377,17 @@ Row=0
 Column=0
 ScrollPosX=0
 ScrollPosY=0
-TimeStamp=1368876620
+TimeStamp=1368879473
 [BookmarksFoldedCode]
-Files=1
+Files=2
 F1=mp-lab-a2.c
+F2=..\..\Assignment 3\src\mp-lab-a3.c
 [Bookmarks1]
 TimeStamp=1368480181
 Row=42
 Column=25
 ScrollPosX=0
-ScrollPosY=27
+ScrollPosY=21
 BK0=-1
 BK1=-1
 BK2=-1
@@ -397,4 +403,22 @@ Files=2
 F1=C:\cvavr\inc\mega16.h
 F2=C:\cvavr\inc\mega16_bits.h
 [FoldedCode1]
+Blocks=0
+[Bookmarks2]
+TimeStamp=1368879283
+Row=0
+Column=0
+ScrollPosX=0
+ScrollPosY=0
+BK0=-1
+BK1=-1
+BK2=-1
+BK3=-1
+BK4=-1
+BK5=-1
+BK6=-1
+BK7=-1
+BK8=-1
+BK9=-1
+[FoldedCode2]
 Blocks=0

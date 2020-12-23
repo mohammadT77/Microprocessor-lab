@@ -1,6 +1,11 @@
-main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a3.c" LINE:38
-show_hello_world DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a3.c" LINE:32
+main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a3.c" LINE:65
+show_hello_world DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a3.c" LINE:36
 lcd_puts DSTACK_USAGE:3 DSTACK_LEVEL:3 FILE:"C:\cvavr\lib\lcd.lib" LINE:210
 lcd_putchar DSTACK_USAGE:1 DSTACK_LEVEL:4 FILE:"C:\cvavr\lib\lcd.lib" LINE:178
 lcd_gotoxy DSTACK_USAGE:2 DSTACK_LEVEL:6 FILE:"C:\cvavr\lib\lcd.lib" LINE:158
 _lcd_write_data DSTACK_USAGE:1 DSTACK_LEVEL:7 FILE:"C:\cvavr\lib\lcd.lib" LINE:77
+timer0_ovf_isr DSTACK_USAGE:12 DSTACK_LEVEL:19 FILE:"mp-lab-a3.c" LINE:53
+timer0_procedure DSTACK_USAGE:0 DSTACK_LEVEL:19 FILE:"mp-lab-a3.c" LINE:42
+lcd_putchar DSTACK_USAGE:1 DSTACK_LEVEL:20 FILE:"C:\cvavr\lib\lcd.lib" LINE:178
+lcd_gotoxy DSTACK_USAGE:2 DSTACK_LEVEL:22 FILE:"C:\cvavr\lib\lcd.lib" LINE:158
+_lcd_write_data DSTACK_USAGE:1 DSTACK_LEVEL:23 FILE:"C:\cvavr\lib\lcd.lib" LINE:77

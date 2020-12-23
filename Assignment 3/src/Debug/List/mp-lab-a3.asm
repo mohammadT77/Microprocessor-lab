@@ -1085,9 +1085,11 @@ __DELAY_USW_LOOP:
 	.ENDM
 
 ;NAME DEFINITIONS FOR GLOBAL VARIABLES ALLOCATED TO REGISTERS
-	.DEF __lcd_x=R5
-	.DEF __lcd_y=R4
-	.DEF __lcd_maxx=R7
+	.DEF _ALPHABETS=R4
+	.DEF _ALPHABETS_msb=R5
+	.DEF __lcd_x=R7
+	.DEF __lcd_y=R6
+	.DEF __lcd_maxx=R9
 
 	.CSEG
 	.ORG 0x00
@@ -1105,7 +1107,7 @@ __START_OF_CODE:
 	JMP  0x00
 	JMP  0x00
 	JMP  0x00
-	JMP  0x00
+	JMP  _timer0_ovf_isr
 	JMP  0x00
 	JMP  0x00
 	JMP  0x00
@@ -1118,22 +1120,40 @@ __START_OF_CODE:
 	JMP  0x00
 	JMP  0x00
 
+;GLOBAL REGISTER VARIABLES INITIALIZATION
+__REG_VARS:
+	.DB  LOW(_0x0*2),HIGH(_0x0*2)
+
+_0x3:
+	.DB  0xFF,0xFF
 _0x0:
-	.DB  0x3E,0x20,0x68,0x65,0x6C,0x6C,0x6F,0x20
-	.DB  0x77,0x6F,0x72,0x6C,0x64,0x21,0x20,0x3C
-	.DB  0x0,0x41,0x33,0x3A,0x20,0x50,0x72,0x6F
-	.DB  0x62,0x6C,0x65,0x6D,0x31,0x0
+	.DB  0x41,0x42,0x43,0x44,0x45,0x46,0x47,0x48
+	.DB  0x49,0x4A,0x4B,0x4C,0x4D,0x4E,0x4F,0x50
+	.DB  0x51,0x52,0x53,0x54,0x55,0x56,0x57,0x58
+	.DB  0x59,0x5A,0x0,0x3E,0x20,0x68,0x65,0x6C
+	.DB  0x6C,0x6F,0x20,0x77,0x6F,0x72,0x6C,0x64
+	.DB  0x21,0x20,0x3C,0x0,0x41,0x33,0x3A,0x20
+	.DB  0x50,0x72,0x6F,0x62,0x6C,0x65,0x6D,0x31
+	.DB  0x0
 _0x2000003:
 	.DB  0x80,0xC0
 
 __GLOBAL_INI_TBL:
+	.DW  0x02
+	.DW  0x04
+	.DW  __REG_VARS*2
+
+	.DW  0x02
+	.DW  _alpha_pointer_G000
+	.DW  _0x3*2
+
 	.DW  0x11
-	.DW  _0x3
-	.DW  _0x0*2
+	.DW  _0x4
+	.DW  _0x0*2+27
 
 	.DW  0x0D
-	.DW  _0x3+17
-	.DW  _0x0*2+17
+	.DW  _0x4+17
+	.DW  _0x0*2+44
 
 	.DW  0x02
 	.DW  __base_y_G100
@@ -1258,54 +1278,190 @@ __GLOBAL_INI_END:
 ;
 ;#include <lcd.h>
 ;
+;static unsigned int timer0_counter = 0;
+;static int alpha_pointer = -1;
+
+	.DSEG
+;const char* ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+;
 ;void show_hello_world(){
-; 0000 0020 void show_hello_world(){
+; 0000 0024 void show_hello_world(){
 
 	.CSEG
 _show_hello_world:
 ; .FSTART _show_hello_world
-; 0000 0021     lcd_puts("> hello world! <");
-	__POINTW2MN _0x3,0
+; 0000 0025     lcd_puts("> hello world! <");
+	__POINTW2MN _0x4,0
 	CALL _lcd_puts
-; 0000 0022     lcd_gotoxy(0,1);
+; 0000 0026     lcd_gotoxy(0,1);
 	LDI  R30,LOW(0)
 	ST   -Y,R30
 	LDI  R26,LOW(1)
 	CALL _lcd_gotoxy
-; 0000 0023     lcd_puts("A3: Problem1"); // Assignment3: Problem 1
-	__POINTW2MN _0x3,17
+; 0000 0027     lcd_puts("A3: Problem1"); // Assignment3: Problem 1
+	__POINTW2MN _0x4,17
 	CALL _lcd_puts
-; 0000 0024 }
+; 0000 0028 }
 	RET
 ; .FEND
 
 	.DSEG
-_0x3:
+_0x4:
 	.BYTE 0x1E
 ;
-;void main(void)
-; 0000 0027 {
+;void timer0_procedure(){
+; 0000 002A void timer0_procedure(){
 
 	.CSEG
+_timer0_procedure:
+; .FSTART _timer0_procedure
+; 0000 002B     if (alpha_pointer>=25){
+	LDS  R26,_alpha_pointer_G000
+	LDS  R27,_alpha_pointer_G000+1
+	SBIW R26,25
+	BRLT _0x5
+; 0000 002C         alpha_pointer=-1;
+	LDI  R30,LOW(65535)
+	LDI  R31,HIGH(65535)
+	STS  _alpha_pointer_G000,R30
+	STS  _alpha_pointer_G000+1,R31
+; 0000 002D     }
+; 0000 002E     if (alpha_pointer==-1){
+_0x5:
+	LDS  R26,_alpha_pointer_G000
+	LDS  R27,_alpha_pointer_G000+1
+	CPI  R26,LOW(0xFFFF)
+	LDI  R30,HIGH(0xFFFF)
+	CPC  R27,R30
+	BRNE _0x6
+; 0000 002F         lcd_clear();
+	CALL _lcd_clear
+; 0000 0030         lcd_gotoxy(0,0);
+	LDI  R30,LOW(0)
+	ST   -Y,R30
+	LDI  R26,LOW(0)
+	CALL _lcd_gotoxy
+; 0000 0031     }
+; 0000 0032     lcd_putchar(ALPHABETS[++alpha_pointer]);
+_0x6:
+	LDI  R26,LOW(_alpha_pointer_G000)
+	LDI  R27,HIGH(_alpha_pointer_G000)
+	LD   R30,X+
+	LD   R31,X+
+	ADIW R30,1
+	ST   -X,R31
+	ST   -X,R30
+	ADD  R30,R4
+	ADC  R31,R5
+	LPM  R26,Z
+	CALL _lcd_putchar
+; 0000 0033 }
+	RET
+; .FEND
+;
+;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
+; 0000 0036 {
+_timer0_ovf_isr:
+; .FSTART _timer0_ovf_isr
+	ST   -Y,R0
+	ST   -Y,R1
+	ST   -Y,R15
+	ST   -Y,R22
+	ST   -Y,R23
+	ST   -Y,R24
+	ST   -Y,R25
+	ST   -Y,R26
+	ST   -Y,R27
+	ST   -Y,R30
+	ST   -Y,R31
+	IN   R30,SREG
+	ST   -Y,R30
+; 0000 0037     TCNT0=0x83;
+	LDI  R30,LOW(131)
+	OUT  0x32,R30
+; 0000 0038     ++timer0_counter;
+	LDI  R26,LOW(_timer0_counter_G000)
+	LDI  R27,HIGH(_timer0_counter_G000)
+	LD   R30,X+
+	LD   R31,X+
+	ADIW R30,1
+	ST   -X,R31
+	ST   -X,R30
+; 0000 0039     if (timer0_counter==1000){ // For 1s Timer0 Tick
+	LDS  R26,_timer0_counter_G000
+	LDS  R27,_timer0_counter_G000+1
+	CPI  R26,LOW(0x3E8)
+	LDI  R30,HIGH(0x3E8)
+	CPC  R27,R30
+	BRNE _0x7
+; 0000 003A         timer0_procedure();
+	RCALL _timer0_procedure
+; 0000 003B         timer0_counter=0;
+	LDI  R30,LOW(0)
+	STS  _timer0_counter_G000,R30
+	STS  _timer0_counter_G000+1,R30
+; 0000 003C     }
+; 0000 003D 
+; 0000 003E 
+; 0000 003F }
+_0x7:
+	LD   R30,Y+
+	OUT  SREG,R30
+	LD   R31,Y+
+	LD   R30,Y+
+	LD   R27,Y+
+	LD   R26,Y+
+	LD   R25,Y+
+	LD   R24,Y+
+	LD   R23,Y+
+	LD   R22,Y+
+	LD   R15,Y+
+	LD   R1,Y+
+	LD   R0,Y+
+	RETI
+; .FEND
+;
+;void main(void)
+; 0000 0042 {
 _main:
 ; .FSTART _main
-; 0000 0028 
-; 0000 0029 DDRA= 0xFF;
+; 0000 0043 
+; 0000 0044 DDRA= 0xFF;
 	LDI  R30,LOW(255)
 	OUT  0x1A,R30
-; 0000 002A 
-; 0000 002B lcd_init(16);
+; 0000 0045 
+; 0000 0046 // Timer/Counter 0 initialization
+; 0000 0047 // Clock source: System Clock
+; 0000 0048 // Clock value: 125.000 kHz
+; 0000 0049 // Mode: Normal top=0xFF
+; 0000 004A // OC0 output: Disconnected
+; 0000 004B // Timer Period: 1 ms
+; 0000 004C TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (1<<CS00);
+	LDI  R30,LOW(3)
+	OUT  0x33,R30
+; 0000 004D TCNT0=0x83;
+	LDI  R30,LOW(131)
+	OUT  0x32,R30
+; 0000 004E 
+; 0000 004F TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+	LDI  R30,LOW(1)
+	OUT  0x39,R30
+; 0000 0050 
+; 0000 0051 lcd_init(16);
 	LDI  R26,LOW(16)
 	CALL _lcd_init
-; 0000 002C show_hello_world();
+; 0000 0052 show_hello_world();
 	RCALL _show_hello_world
-; 0000 002D 
-; 0000 002E while (1);
-_0x4:
-	RJMP _0x4
-; 0000 002F }
-_0x7:
-	RJMP _0x7
+; 0000 0053 
+; 0000 0054 #asm("sei");
+	sei
+; 0000 0055 
+; 0000 0056 while (1);
+_0x8:
+	RJMP _0x8
+; 0000 0057 }
+_0xB:
+	RJMP _0xB
 ; .FEND
     .equ __lcd_direction=__lcd_port-1
     .equ __lcd_pin=__lcd_port-2
@@ -1407,8 +1563,8 @@ _lcd_gotoxy:
 	LDD  R26,Y+1
 	ADD  R26,R30
 	CALL __lcd_write_data
-	LDD  R5,Y+1
-	LDD  R4,Y+0
+	LDD  R7,Y+1
+	LDD  R6,Y+0
 	ADIW R28,2
 	RET
 ; .FEND
@@ -1424,8 +1580,8 @@ _lcd_clear:
 	LDI  R26,LOW(1)
 	CALL __lcd_write_data
 	LDI  R30,LOW(0)
-	MOV  R4,R30
-	MOV  R5,R30
+	MOV  R6,R30
+	MOV  R7,R30
 	RET
 ; .FEND
 _lcd_putchar:
@@ -1438,17 +1594,17 @@ _lcd_putchar:
     cpi  r26,10
     breq __lcd_putchar1
     clt
-	CP   R5,R7
+	CP   R7,R9
 	BRLO _0x2000004
 	__lcd_putchar1:
-	INC  R4
+	INC  R6
 	LDI  R30,LOW(0)
 	ST   -Y,R30
-	MOV  R26,R4
+	MOV  R26,R6
 	RCALL _lcd_gotoxy
 	brts __lcd_putchar0
 _0x2000004:
-	INC  R5
+	INC  R7
     rcall __lcd_ready
     sbi  __lcd_port,__lcd_rs ;RS=1
 	LD   R26,Y
@@ -1508,7 +1664,7 @@ _lcd_init:
 	ST   -Y,R26
     cbi   __lcd_port,__lcd_enable ;EN=0
     cbi   __lcd_port,__lcd_rs     ;RS=0
-	LDD  R7,Y+0
+	LDD  R9,Y+0
 	LD   R30,Y
 	SUBI R30,-LOW(128)
 	__PUTB1MN __base_y_G100,2
@@ -1549,6 +1705,10 @@ _0x2020001:
 ; .FEND
 
 	.DSEG
+_timer0_counter_G000:
+	.BYTE 0x2
+_alpha_pointer_G000:
+	.BYTE 0x2
 __base_y_G100:
 	.BYTE 0x4
 

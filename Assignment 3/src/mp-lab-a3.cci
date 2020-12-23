@@ -1,5 +1,10 @@
-VERSION:3 SOURCE_TIMESTAMP:51976D7C
+VERSION:3 SOURCE_TIMESTAMP:519770B3
 NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\mega16.h"
 NODE:I LEVEL:0 LINE:30 "C:\cvavr\inc\lcd.h"
-NODE:F LEVEL:0 LINE:32 "show_hello_world(void)"
-NODE:F LEVEL:0 LINE:38 "main(void)"
+NODE:V LEVEL:0 LINE:32 "timer0_counter_G000 -> RAM:????"
+NODE:V LEVEL:0 LINE:33 "alpha_pointer_G000 -> RAM:????"
+NODE:V LEVEL:0 LINE:34 "*ALPHABETS -> R4,R5"
+NODE:F LEVEL:0 LINE:36 "show_hello_world(void)"
+NODE:F LEVEL:0 LINE:42 "timer0_procedure(void)"
+NODE:F LEVEL:0 LINE:53 "timer0_ovf_isr(void)"
+NODE:F LEVEL:0 LINE:65 "main(void)"
