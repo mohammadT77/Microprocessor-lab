@@ -55,6 +55,9 @@
 ; 0000 001C #endasm
 ;
 ;#include <lcd.h>
+;#include <stdlib.h>
+;
+;#define ICP_EN PINC.0
 ;
 ;static unsigned int timer0_counter = 0;
 ;static int alpha_pointer = -1;
@@ -62,26 +65,30 @@
 	.DSEG
 ;const char* ALPHABETS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 ;
+;static unsigned int timer1_counter = 0;
+;const unsigned long TIMER1_VALUE = 0xE0C0;
+;
+;
 ;void show_hello_world(){
-; 0000 0024 void show_hello_world(){
+; 0000 002B void show_hello_world(){
 
 	.CSEG
 ;PCODE: $00000010 VOL: 0
 ;PCODE: $00000011 VOL: 0
-; 0000 0025     lcd_puts("> hello world! <");
+; 0000 002C     lcd_puts("> hello world! <");
 ;PCODE: $00000012 VOL: 0
 ;PCODE: $00000013 VOL: 0
 ;PCODE: $00000014 VOL: 0
-; 0000 0026     lcd_gotoxy(0,1);
+; 0000 002D     lcd_gotoxy(0,1);
 ;PCODE: $00000015 VOL: 0
 ;PCODE: $00000016 VOL: 0
 ;PCODE: $00000017 VOL: 0
 ;PCODE: $00000018 VOL: 0
-; 0000 0027     lcd_puts("A3: Problem1"); // Assignment3: Problem 1
+; 0000 002E     lcd_puts("A3: Problem1"); // Assignment3: Problem 1
 ;PCODE: $00000019 VOL: 0
 ;PCODE: $0000001A VOL: 0
 ;PCODE: $0000001B VOL: 0
-; 0000 0028 }
+; 0000 002F }
 ;PCODE: $0000001C VOL: 0
 ;PCODE: $0000001D VOL: 0
 
@@ -89,34 +96,34 @@
 _0x4:
 	.BYTE 0x1E
 ;
-;void timer0_procedure(){
-; 0000 002A void timer0_procedure(){
+;void timer0_procedure(){  // Assignment3: Problem 2
+; 0000 0031 void timer0_procedure(){
 
 	.CSEG
 ;PCODE: $0000001E VOL: 0
 ;PCODE: $0000001F VOL: 0
-; 0000 002B     if (alpha_pointer>=25){
+; 0000 0032     if (alpha_pointer>=25){
 ;PCODE: $00000020 VOL: 0
 ;PCODE: $00000021 VOL: 0
 ;PCODE: $00000022 VOL: 0
-; 0000 002C         alpha_pointer=-1;
+; 0000 0033         alpha_pointer=-1;
 ;PCODE: $00000023 VOL: 0
 ;PCODE: $00000024 VOL: 0
-; 0000 002D     }
-; 0000 002E     if (alpha_pointer==-1){
+; 0000 0034     }
+; 0000 0035     if (alpha_pointer==-1){
 ;PCODE: $00000025 VOL: 0
 ;PCODE: $00000026 VOL: 0
 ;PCODE: $00000027 VOL: 0
 ;PCODE: $00000028 VOL: 0
-; 0000 002F         lcd_clear();
+; 0000 0036         lcd_clear();
 ;PCODE: $00000029 VOL: 0
-; 0000 0030         lcd_gotoxy(0,0);
+; 0000 0037         lcd_gotoxy(0,0);
 ;PCODE: $0000002A VOL: 0
 ;PCODE: $0000002B VOL: 0
 ;PCODE: $0000002C VOL: 0
 ;PCODE: $0000002D VOL: 0
-; 0000 0031     }
-; 0000 0032     lcd_putchar(ALPHABETS[++alpha_pointer]);
+; 0000 0038     }
+; 0000 0039     lcd_putchar(ALPHABETS[++alpha_pointer]);
 ;PCODE: $0000002E VOL: 0
 ;PCODE: $0000002F VOL: 0
 ;PCODE: $00000030 VOL: 0
@@ -125,81 +132,256 @@ _0x4:
 ;PCODE: $00000033 VOL: 0
 ;PCODE: $00000034 VOL: 0
 ;PCODE: $00000035 VOL: 0
-; 0000 0033 }
+; 0000 003A }
 ;PCODE: $00000036 VOL: 0
 ;PCODE: $00000037 VOL: 0
 ;
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0000 0036 {
+; 0000 003D {
 ;PCODE: $00000038 VOL: 0
 ;PCODE: $00000039 VOL: 0
-; 0000 0037     TCNT0=0x83;
+; 0000 003E     TCNT0=0x83;
 ;PCODE: $0000003A VOL: 0
 ;PCODE: $0000003B VOL: 0
-; 0000 0038     ++timer0_counter;
+; 0000 003F     ++timer0_counter;
 ;PCODE: $0000003C VOL: 0
 ;PCODE: $0000003D VOL: 0
 ;PCODE: $0000003E VOL: 0
 ;PCODE: $0000003F VOL: 0
-; 0000 0039     if (timer0_counter==1000){ // For 1s Timer0 Tick
+; 0000 0040     if (timer0_counter==1000){ // Timer0 Tick period = 1 sec
 ;PCODE: $00000040 VOL: 0
 ;PCODE: $00000041 VOL: 0
 ;PCODE: $00000042 VOL: 0
-; 0000 003A         timer0_procedure();
+; 0000 0041         timer0_procedure();
 ;PCODE: $00000043 VOL: 0
-; 0000 003B         timer0_counter=0;
+; 0000 0042         timer0_counter=0;
 ;PCODE: $00000044 VOL: 0
 ;PCODE: $00000045 VOL: 0
-; 0000 003C     }
-; 0000 003D 
-; 0000 003E 
-; 0000 003F }
+; 0000 0043     }
+; 0000 0044 }
 ;PCODE: $00000046 VOL: 0
 ;PCODE: $00000047 VOL: 0
 ;PCODE: $00000048 VOL: 0
 ;PCODE: $00000049 VOL: 0
 ;
-;void main(void)
-; 0000 0042 {
+;interrupt [TIM1_OVF] void timer1_ovf_isr(void)
+; 0000 0047 {
 ;PCODE: $0000004A VOL: 0
-; 0000 0043 
-; 0000 0044 DDRA= 0xFF;
 ;PCODE: $0000004B VOL: 0
+; 0000 0048     TCNT1=TIMER1_VALUE;
 ;PCODE: $0000004C VOL: 0
-; 0000 0045 
-; 0000 0046 // Timer/Counter 0 initialization
-; 0000 0047 // Clock source: System Clock
-; 0000 0048 // Clock value: 125.000 kHz
-; 0000 0049 // Mode: Normal top=0xFF
-; 0000 004A // OC0 output: Disconnected
-; 0000 004B // Timer Period: 1 ms
-; 0000 004C TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (1<<CS00);
 ;PCODE: $0000004D VOL: 0
+; 0000 0049     ++timer1_counter;
 ;PCODE: $0000004E VOL: 0
-; 0000 004D TCNT0=0x83;
 ;PCODE: $0000004F VOL: 0
 ;PCODE: $00000050 VOL: 0
-; 0000 004E 
-; 0000 004F TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
 ;PCODE: $00000051 VOL: 0
+; 0000 004A }
 ;PCODE: $00000052 VOL: 0
-; 0000 0050 
-; 0000 0051 lcd_init(16);
 ;PCODE: $00000053 VOL: 0
 ;PCODE: $00000054 VOL: 0
-; 0000 0052 show_hello_world();
+;
+;interrupt [TIM1_CAPT] void timer1_capt_isr(void)
+; 0000 004D {
 ;PCODE: $00000055 VOL: 0
-; 0000 0053 
-; 0000 0054 #asm("sei");
 ;PCODE: $00000056 VOL: 0
-	sei
+; 0000 004E     char str_period[10];
+; 0000 004F     char str_freq[10];
+; 0000 0050     unsigned long period;
+; 0000 0051     unsigned int lcr1;
+; 0000 0052 
+; 0000 0053     lcr1 = (ICR1H*256)+ICR1L;
 ;PCODE: $00000057 VOL: 0
-; 0000 0055 
-; 0000 0056 while (1);
 ;PCODE: $00000058 VOL: 0
 ;PCODE: $00000059 VOL: 0
+;	str_period -> Y+16
+;	str_freq -> Y+6
+;	period -> Y+2
+;	lcr1 -> R16,R17
 ;PCODE: $0000005A VOL: 0
-; 0000 0057 }
 ;PCODE: $0000005B VOL: 0
 ;PCODE: $0000005C VOL: 0
 ;PCODE: $0000005D VOL: 0
+;PCODE: $0000005E VOL: 0
+;PCODE: $0000005F VOL: 0
+;PCODE: $00000060 VOL: 0
+; 0000 0054     period = ((unsigned long)(((float)lcr1)/((float)(0xffff-TIMER1_VALUE))))
+; 0000 0055             + ((unsigned long) timer1_counter) ;
+;PCODE: $00000061 VOL: 0
+;PCODE: $00000062 VOL: 0
+;PCODE: $00000063 VOL: 0
+;PCODE: $00000064 VOL: 0
+;PCODE: $00000065 VOL: 0
+;PCODE: $00000066 VOL: 0
+;PCODE: $00000067 VOL: 0
+;PCODE: $00000068 VOL: 0
+;PCODE: $00000069 VOL: 0
+;PCODE: $0000006A VOL: 0
+;PCODE: $0000006B VOL: 0
+; 0000 0056 
+; 0000 0057 
+; 0000 0058     timer1_counter = 0;
+;PCODE: $0000006C VOL: 0
+;PCODE: $0000006D VOL: 0
+; 0000 0059     TCNT1=TIMER1_VALUE;
+;PCODE: $0000006E VOL: 0
+;PCODE: $0000006F VOL: 0
+; 0000 005A 
+; 0000 005B     itoa(period,str_period);
+;PCODE: $00000070 VOL: 0
+;PCODE: $00000071 VOL: 0
+;PCODE: $00000072 VOL: 0
+;PCODE: $00000073 VOL: 0
+; 0000 005C     ftoa(1/((float)period/1000),3,str_freq);
+;PCODE: $00000074 VOL: 0
+;PCODE: $00000075 VOL: 0
+;PCODE: $00000076 VOL: 0
+;PCODE: $00000077 VOL: 0
+;PCODE: $00000078 VOL: 0
+;PCODE: $00000079 VOL: 0
+;PCODE: $0000007A VOL: 0
+;PCODE: $0000007B VOL: 0
+;PCODE: $0000007C VOL: 0
+;PCODE: $0000007D VOL: 0
+;PCODE: $0000007E VOL: 0
+;PCODE: $0000007F VOL: 0
+; 0000 005D 
+; 0000 005E     lcd_clear();
+;PCODE: $00000080 VOL: 0
+; 0000 005F     lcd_puts("Period: ");
+;PCODE: $00000081 VOL: 0
+;PCODE: $00000082 VOL: 0
+;PCODE: $00000083 VOL: 0
+; 0000 0060     lcd_puts(str_period);
+;PCODE: $00000084 VOL: 0
+;PCODE: $00000085 VOL: 0
+; 0000 0061     lcd_puts(" ms");
+;PCODE: $00000086 VOL: 0
+;PCODE: $00000087 VOL: 0
+;PCODE: $00000088 VOL: 0
+; 0000 0062     lcd_gotoxy(0,1);
+;PCODE: $00000089 VOL: 0
+;PCODE: $0000008A VOL: 0
+;PCODE: $0000008B VOL: 0
+;PCODE: $0000008C VOL: 0
+; 0000 0063     lcd_puts("Freq: ");
+;PCODE: $0000008D VOL: 0
+;PCODE: $0000008E VOL: 0
+;PCODE: $0000008F VOL: 0
+; 0000 0064     lcd_puts(str_freq);
+;PCODE: $00000090 VOL: 0
+;PCODE: $00000091 VOL: 0
+; 0000 0065     lcd_puts(" MHz");
+;PCODE: $00000092 VOL: 0
+;PCODE: $00000093 VOL: 0
+;PCODE: $00000094 VOL: 0
+; 0000 0066 }
+;PCODE: $00000095 VOL: 0
+;PCODE: $00000096 VOL: 0
+;PCODE: $00000097 VOL: 0
+;PCODE: $00000098 VOL: 0
+;PCODE: $00000099 VOL: 0
+;PCODE: $0000009A VOL: 0
+;PCODE: $0000009B VOL: 0
+;PCODE: $0000009C VOL: 0
+
+	.DSEG
+_0x8:
+	.BYTE 0x19
+;
+;
+;void main(void)
+; 0000 006A {
+
+	.CSEG
+;PCODE: $0000009D VOL: 0
+; 0000 006B 
+; 0000 006C DDRA= 0xFF;
+;PCODE: $0000009E VOL: 0
+;PCODE: $0000009F VOL: 0
+; 0000 006D DDRC= 0xF0;
+;PCODE: $000000A0 VOL: 0
+;PCODE: $000000A1 VOL: 0
+; 0000 006E PORTC.7 = 0;
+;PCODE: $000000A2 VOL: 0
+;PCODE: $000000A3 VOL: 0
+; 0000 006F 
+; 0000 0070 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (1<<CS00);
+;PCODE: $000000A4 VOL: 0
+;PCODE: $000000A5 VOL: 0
+; 0000 0071 TCNT0=0x83;
+;PCODE: $000000A6 VOL: 0
+;PCODE: $000000A7 VOL: 0
+; 0000 0072 
+; 0000 0073 TCCR1A= 0;
+;PCODE: $000000A8 VOL: 0
+;PCODE: $000000A9 VOL: 0
+; 0000 0074 TCCR1B=(1<<ICNC1) | (0<<ICES1) | (0<<WGM13) | (0<<WGM12) | (0<<CS12) | (0<<CS11) | (1<<CS10);
+;PCODE: $000000AA VOL: 0
+;PCODE: $000000AB VOL: 0
+; 0000 0075 TCNT1=TIMER1_VALUE;
+;PCODE: $000000AC VOL: 0
+;PCODE: $000000AD VOL: 0
+; 0000 0076 ICR1H=0x00;
+;PCODE: $000000AE VOL: 0
+;PCODE: $000000AF VOL: 0
+; 0000 0077 ICR1L=0x00;
+;PCODE: $000000B0 VOL: 0
+;PCODE: $000000B1 VOL: 0
+; 0000 0078 
+; 0000 0079 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (1<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (1<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+;PCODE: $000000B2 VOL: 0
+;PCODE: $000000B3 VOL: 0
+; 0000 007A 
+; 0000 007B lcd_init(16);
+;PCODE: $000000B4 VOL: 0
+;PCODE: $000000B5 VOL: 0
+; 0000 007C show_hello_world();
+;PCODE: $000000B6 VOL: 0
+; 0000 007D 
+; 0000 007E #asm("sei");
+;PCODE: $000000B7 VOL: 0
+	sei
+;PCODE: $000000B8 VOL: 0
+; 0000 007F 
+; 0000 0080 while (1){
+;PCODE: $000000B9 VOL: 0
+; 0000 0081  if (ICP_EN){
+;PCODE: $000000BA VOL: 0
+;PCODE: $000000BB VOL: 0
+;PCODE: $000000BC VOL: 0
+; 0000 0082      TIMSK |= (1<<TICIE1) | (1<<TOIE1);
+;PCODE: $000000BD VOL: 0
+;PCODE: $000000BE VOL: 0
+;PCODE: $000000BF VOL: 0
+; 0000 0083      TIMSK &= ~(1<<TOIE0);
+;PCODE: $000000C0 VOL: 0
+;PCODE: $000000C1 VOL: 0
+;PCODE: $000000C2 VOL: 0
+; 0000 0084      alpha_pointer = -1;
+;PCODE: $000000C3 VOL: 0
+;PCODE: $000000C4 VOL: 0
+; 0000 0085  } else {
+;PCODE: $000000C5 VOL: 0
+;PCODE: $000000C6 VOL: 0
+; 0000 0086      TIMSK &= ~(1<<TICIE1);
+;PCODE: $000000C7 VOL: 0
+;PCODE: $000000C8 VOL: 0
+;PCODE: $000000C9 VOL: 0
+; 0000 0087      TIMSK &= ~(1<<TOIE1);
+;PCODE: $000000CA VOL: 0
+;PCODE: $000000CB VOL: 0
+;PCODE: $000000CC VOL: 0
+; 0000 0088      TIMSK |= (1<<TOIE0);
+;PCODE: $000000CD VOL: 0
+;PCODE: $000000CE VOL: 0
+;PCODE: $000000CF VOL: 0
+; 0000 0089  }
+;PCODE: $000000D0 VOL: 0
+; 0000 008A }
+;PCODE: $000000D1 VOL: 0
+;PCODE: $000000D2 VOL: 0
+; 0000 008B }
+;PCODE: $000000D3 VOL: 0
+;PCODE: $000000D4 VOL: 0
+;PCODE: $000000D5 VOL: 0
