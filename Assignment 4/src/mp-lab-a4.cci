@@ -1,6 +1,9 @@
-VERSION:3 SOURCE_TIMESTAMP:5229AF33
+VERSION:3 SOURCE_TIMESTAMP:5229B9BB
 NODE:I LEVEL:0 LINE:24 "C:\cvavr\inc\mega16.h"
-NODE:V LEVEL:0 LINE:26 "timer_counter_G000 -> RAM:????"
-NODE:F LEVEL:0 LINE:28 "timer_procedure(void)"
-NODE:F LEVEL:0 LINE:32 "timer0_ovf_isr(void)"
-NODE:F LEVEL:0 LINE:43 "main(void)"
+NODE:I LEVEL:0 LINE:25 "C:\cvavr\inc\delay.h"
+NODE:C LEVEL:0 LINE:28 "STEPS -> RAM:????"
+NODE:V LEVEL:0 LINE:29 "timer_counter_G000 -> RAM:????"
+NODE:V LEVEL:0 LINE:30 "state_G000 -> RAM:????"
+NODE:F LEVEL:0 LINE:32 "timer_procedure(void)"
+NODE:F LEVEL:0 LINE:42 "timer0_ovf_isr(void)"
+NODE:F LEVEL:0 LINE:53 "main(void)"

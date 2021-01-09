@@ -22,18 +22,28 @@ Data Stack size         : 256
 *******************************************************/
 
 #include <mega16.h>
+#include <delay.h>
 
+//const char STEPS[4] = {0b00001001,0b00000101,0b00000110,0b00001010};
+const char STEPS[8] = {0b00001001,0b00001000,0b000001010,0b00000010,0b00000110,0b00000100,0b00000101,0b00000001};
 static unsigned int timer_counter = 0;
+static char state = 0;
 
 void timer_procedure(){
-    PORTA ^= 0xFF;
+    if (state>=8){
+        state = 0;
+        return;
+    } 
+    if (state<0)
+        return;
+    PORTA = STEPS[state++];
 }
 
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
     TCNT0=0x83;
     timer_counter++;
-    if (timer_counter==5){
+    if (timer_counter==1000){
         timer_procedure();
         timer_counter = 0; 
     }
@@ -43,9 +53,10 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 void main(void)
 {
 
-DDRA=0xFF;
+DDRA=0x0F;
+PORTA = 0x00;
 DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
-DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (1<<DDC2) | (0<<DDC1) | (0<<DDC0);
+DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
 DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
 
 
@@ -64,8 +75,16 @@ TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TO
 #asm("sei")
 
 while (1)
-      {
-      // Place your code here
-
+  {
+      if (!PINC.2){
+        //TCNT0=0x83;
+        //timer_counter=0;            
+        TIMSK=0;
+        delay_ms(1000);
+        PORTA = 0;
+        delay_ms(1000);
+        TIMSK=1;
       }
+
+  }
 }

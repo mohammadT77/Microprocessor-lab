@@ -1113,6 +1113,19 @@ __START_OF_CODE:
 	JMP  0x00
 	JMP  0x00
 
+_0x3:
+	.DB  0x9,0x8,0xA,0x2,0x6,0x4,0x5,0x1
+
+__GLOBAL_INI_TBL:
+	.DW  0x08
+	.DW  _STEPS
+	.DW  _0x3*2
+
+_0xFFFFFFFF:
+	.DW  0
+
+#define __GLOBAL_INI_TBL_PRESENT 1
+
 __RESET:
 	CLI
 	CLR  R30
@@ -1142,6 +1155,29 @@ __CLEAR_SRAM:
 	ST   X+,R30
 	SBIW R24,1
 	BRNE __CLEAR_SRAM
+
+;GLOBAL VARIABLES INITIALIZATION
+	LDI  R30,LOW(__GLOBAL_INI_TBL*2)
+	LDI  R31,HIGH(__GLOBAL_INI_TBL*2)
+__GLOBAL_INI_NEXT:
+	LPM  R24,Z+
+	LPM  R25,Z+
+	SBIW R24,0
+	BREQ __GLOBAL_INI_END
+	LPM  R26,Z+
+	LPM  R27,Z+
+	LPM  R0,Z+
+	LPM  R1,Z+
+	MOVW R22,R30
+	MOVW R30,R0
+__GLOBAL_INI_LOOP:
+	LPM  R0,Z+
+	ST   X+,R0
+	SBIW R24,1
+	BRNE __GLOBAL_INI_LOOP
+	MOVW R30,R22
+	RJMP __GLOBAL_INI_NEXT
+__GLOBAL_INI_END:
 
 ;HARDWARE STACK POINTER INITIALIZATION
 	LDI  R30,LOW(__SRAM_END-__HEAP_SIZE)
@@ -1197,26 +1233,51 @@ __CLEAR_SRAM:
 	.EQU __sm_adc_noise_red=0x10
 	.SET power_ctrl_reg=mcucr
 	#endif
+;#include <delay.h>
 ;
+;//const char STEPS[4] = {0b00001001,0b00000101,0b00000110,0b00001010};
+;const char STEPS[8] = {0b00001001,0b00001000,0b000001010,0b00000010,0b00000110,0b00000100,0b00000101,0b00000001};
+
+	.DSEG
 ;static unsigned int timer_counter = 0;
+;static char state = 0;
 ;
 ;void timer_procedure(){
-; 0000 001C void timer_procedure(){
+; 0000 0020 void timer_procedure(){
 
 	.CSEG
 _timer_procedure:
 ; .FSTART _timer_procedure
-; 0000 001D     PORTA ^= 0xFF;
-	IN   R30,0x1B
-	LDI  R26,LOW(255)
-	EOR  R30,R26
+; 0000 0021     if (state>=8){
+	LDS  R26,_state_G000
+	CPI  R26,LOW(0x8)
+	BRLO _0x4
+; 0000 0022         state = 0;
+	LDI  R30,LOW(0)
+	STS  _state_G000,R30
+; 0000 0023         return;
+	RET
+; 0000 0024     }
+; 0000 0025     if (state<0)
+_0x4:
+	LDS  R26,_state_G000
+; 0000 0026         return;
+; 0000 0027     PORTA = STEPS[state++];
+	LDS  R30,_state_G000
+	SUBI R30,-LOW(1)
+	STS  _state_G000,R30
+	SUBI R30,LOW(1)
+	LDI  R31,0
+	SUBI R30,LOW(-_STEPS)
+	SBCI R31,HIGH(-_STEPS)
+	LD   R30,Z
 	OUT  0x1B,R30
-; 0000 001E }
+; 0000 0028 }
 	RET
 ; .FEND
 ;
 ;interrupt [TIM0_OVF] void timer0_ovf_isr(void)
-; 0000 0021 {
+; 0000 002B {
 _timer0_ovf_isr:
 ; .FSTART _timer0_ovf_isr
 	ST   -Y,R0
@@ -1232,10 +1293,10 @@ _timer0_ovf_isr:
 	ST   -Y,R31
 	IN   R30,SREG
 	ST   -Y,R30
-; 0000 0022     TCNT0=0x83;
+; 0000 002C     TCNT0=0x83;
 	LDI  R30,LOW(131)
 	OUT  0x32,R30
-; 0000 0023     timer_counter++;
+; 0000 002D     timer_counter++;
 	LDI  R26,LOW(_timer_counter_G000)
 	LDI  R27,HIGH(_timer_counter_G000)
 	LD   R30,X+
@@ -1243,21 +1304,23 @@ _timer0_ovf_isr:
 	ADIW R30,1
 	ST   -X,R31
 	ST   -X,R30
-; 0000 0024     if (timer_counter==5){
+; 0000 002E     if (timer_counter==1000){
 	LDS  R26,_timer_counter_G000
 	LDS  R27,_timer_counter_G000+1
-	SBIW R26,5
-	BRNE _0x3
-; 0000 0025         timer_procedure();
+	CPI  R26,LOW(0x3E8)
+	LDI  R30,HIGH(0x3E8)
+	CPC  R27,R30
+	BRNE _0x6
+; 0000 002F         timer_procedure();
 	RCALL _timer_procedure
-; 0000 0026         timer_counter = 0;
+; 0000 0030         timer_counter = 0;
 	LDI  R30,LOW(0)
 	STS  _timer_counter_G000,R30
 	STS  _timer_counter_G000+1,R30
-; 0000 0027     }
-; 0000 0028 
-; 0000 0029 }
-_0x3:
+; 0000 0031     }
+; 0000 0032 
+; 0000 0033 }
+_0x6:
 	LD   R30,Y+
 	OUT  SREG,R30
 	LD   R31,Y+
@@ -1275,65 +1338,103 @@ _0x3:
 ; .FEND
 ;
 ;void main(void)
-; 0000 002C {
+; 0000 0036 {
 _main:
 ; .FSTART _main
-; 0000 002D 
-; 0000 002E DDRA=0xFF;
-	LDI  R30,LOW(255)
+; 0000 0037 
+; 0000 0038 DDRA=0x0F;
+	LDI  R30,LOW(15)
 	OUT  0x1A,R30
-; 0000 002F DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
+; 0000 0039 PORTA = 0x00;
 	LDI  R30,LOW(0)
+	OUT  0x1B,R30
+; 0000 003A DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
 	OUT  0x17,R30
-; 0000 0030 DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (1<<DDC2) | (0<<DDC1) | (0<<DDC0);
-	LDI  R30,LOW(4)
+; 0000 003B DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
 	OUT  0x14,R30
-; 0000 0031 DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
-	LDI  R30,LOW(0)
+; 0000 003C DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
 	OUT  0x11,R30
-; 0000 0032 
-; 0000 0033 
-; 0000 0034 // Timer/Counter 0 initialization
-; 0000 0035 // Clock source: System Clock
-; 0000 0036 // Clock value: 125.000 kHz
-; 0000 0037 // Mode: Normal top=0xFF
-; 0000 0038 // OC0 output: Disconnected
-; 0000 0039 // Timer Period: 1 ms
-; 0000 003A TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (1<<CS00);
+; 0000 003D 
+; 0000 003E 
+; 0000 003F // Timer/Counter 0 initialization
+; 0000 0040 // Clock source: System Clock
+; 0000 0041 // Clock value: 125.000 kHz
+; 0000 0042 // Mode: Normal top=0xFF
+; 0000 0043 // OC0 output: Disconnected
+; 0000 0044 // Timer Period: 1 ms
+; 0000 0045 TCCR0=(0<<WGM00) | (0<<COM01) | (0<<COM00) | (0<<WGM01) | (0<<CS02) | (1<<CS01) | (1<<CS00);
 	LDI  R30,LOW(3)
 	OUT  0x33,R30
-; 0000 003B TCNT0=0x83;
+; 0000 0046 TCNT0=0x83;
 	LDI  R30,LOW(131)
 	OUT  0x32,R30
-; 0000 003C OCR0=0x00;
+; 0000 0047 OCR0=0x00;
 	LDI  R30,LOW(0)
 	OUT  0x3C,R30
-; 0000 003D 
-; 0000 003E TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
+; 0000 0048 
+; 0000 0049 TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TOIE1) | (0<<OCIE0) | (1<<TOIE0);
 	LDI  R30,LOW(1)
 	OUT  0x39,R30
-; 0000 003F 
-; 0000 0040 #asm("sei")
+; 0000 004A 
+; 0000 004B #asm("sei")
 	sei
-; 0000 0041 
-; 0000 0042 while (1)
-_0x4:
-; 0000 0043       {
-; 0000 0044       // Place your code here
-; 0000 0045 
-; 0000 0046       }
-	RJMP _0x4
-; 0000 0047 }
+; 0000 004C 
+; 0000 004D while (1)
 _0x7:
+; 0000 004E   {
+; 0000 004F       if (!PINC.2){
+	SBIC 0x13,2
+	RJMP _0xA
+; 0000 0050         //TCNT0=0x83;
+; 0000 0051         //timer_counter=0;
+; 0000 0052         TIMSK=0;
+	LDI  R30,LOW(0)
+	OUT  0x39,R30
+; 0000 0053         delay_ms(5);
+	LDI  R26,LOW(5)
+	LDI  R27,0
+	CALL _delay_ms
+; 0000 0054         PORTA = 0;
+	LDI  R30,LOW(0)
+	OUT  0x1B,R30
+; 0000 0055         delay_ms(5);
+	LDI  R26,LOW(5)
+	LDI  R27,0
+	CALL _delay_ms
+; 0000 0056         TIMSK=1;
+	LDI  R30,LOW(1)
+	OUT  0x39,R30
+; 0000 0057       }
+; 0000 0058 
+; 0000 0059   }
+_0xA:
 	RJMP _0x7
+; 0000 005A }
+_0xB:
+	RJMP _0xB
 ; .FEND
 
 	.DSEG
+_STEPS:
+	.BYTE 0x8
 _timer_counter_G000:
 	.BYTE 0x2
+_state_G000:
+	.BYTE 0x1
 
 	.CSEG
 
 	.CSEG
+_delay_ms:
+	adiw r26,0
+	breq __delay_ms1
+__delay_ms0:
+	__DELAY_USW 0x7D0
+	wdr
+	sbiw r26,1
+	brne __delay_ms0
+__delay_ms1:
+	ret
+
 ;END OF CODE MARKER
 __END_OF_CODE:
