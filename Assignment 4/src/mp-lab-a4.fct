@@ -1,2 +1,11 @@
-main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a4.c" LINE:56
-timer0_ovf_isr DSTACK_USAGE:12 DSTACK_LEVEL:12 FILE:"mp-lab-a4.c" LINE:45
+main DSTACK_USAGE:0 DSTACK_LEVEL:0 FILE:"mp-lab-a4.c" LINE:111
+lcd_puts DSTACK_USAGE:3 DSTACK_LEVEL:3 FILE:"C:\cvavr\lib\lcd.lib" LINE:210
+lcd_putchar DSTACK_USAGE:1 DSTACK_LEVEL:4 FILE:"C:\cvavr\lib\lcd.lib" LINE:178
+lcd_gotoxy DSTACK_USAGE:2 DSTACK_LEVEL:6 FILE:"C:\cvavr\lib\lcd.lib" LINE:158
+_lcd_write_data DSTACK_USAGE:1 DSTACK_LEVEL:7 FILE:"C:\cvavr\lib\lcd.lib" LINE:77
+timer0_ovf_isr DSTACK_USAGE:12 DSTACK_LEVEL:19 FILE:"mp-lab-a4.c" LINE:89
+timer_procedure_speed DSTACK_USAGE:0 DSTACK_LEVEL:19 FILE:"mp-lab-a4.c" LINE:72
+print_speed_acc DSTACK_USAGE:20 DSTACK_LEVEL:39 FILE:"mp-lab-a4.c" LINE:45
+ftoa DSTACK_USAGE:13 DSTACK_LEVEL:52 FILE:"C:\cvavr\lib\stdlib.lib" LINE:959
+floor DSTACK_USAGE:4 DSTACK_LEVEL:56 FILE:"C:\cvavr\lib\math.lib" LINE:659
+ftrunc DSTACK_USAGE:4 DSTACK_LEVEL:60 FILE:"C:\cvavr\lib\math.lib" LINE:544
