@@ -67,7 +67,6 @@ void timer_procedure(){
     if (state>=8 || state<0)
         state = dir==1?0:7;
     PORTA = STEPS[state];  
-    print_speed_acc();
     
 }
 void timer_procedure_speed(){    
@@ -83,7 +82,8 @@ void timer_procedure_speed(){
         speed = MAX_SPEED;
         acc *= -1;   
     }             
-    speed += acc; 
+    speed += acc;   
+    print_speed_acc();
 }
 
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)

@@ -40,7 +40,7 @@ short int dir=0;
 
 unsigned int step_count =0;
 int speed=0;
-int acc=70;
+int acc=100;
 
 void print_speed_acc(){
     char str_speed[10];

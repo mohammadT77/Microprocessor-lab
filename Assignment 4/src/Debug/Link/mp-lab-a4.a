@@ -69,7 +69,7 @@
 ;
 ;unsigned int step_count =0;
 ;int speed=0;
-;int acc=70;
+;int acc=100;
 ;
 ;void print_speed_acc(){
 ; 0000 002D void print_speed_acc(){

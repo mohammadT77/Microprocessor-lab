@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.1.30  F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\mp-lab-a4.asm Sun Jan 10 15:41:34 2021
+AVRASM ver. 2.1.30  F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\mp-lab-a4.asm Sun Jan 10 15:58:38 2021
 
 F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\mp-lab-a4.asm(1088): warning: Register r4 already defined by the .DEF directive
 F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\mp-lab-a4.asm(1089): warning: Register r5 already defined by the .DEF directive
@@ -1145,7 +1145,7 @@ F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\m
 00002b 0000      	.DB  0xFF,0xFF,0x0,0x0
 00002c 0000
 00002d 0000      	.DB  0x0,0x0,0x0,0x0
-00002e 0046      	.DB  0x46,0x0
+00002e 0064      	.DB  0x64,0x0
                  
                  _0x3:
 00002f 0009
@@ -1381,7 +1381,7 @@ F:\Univeristy\Term9\Microprocessor Lab\Assignments\Assignment 4\src\Debug\List\m
                  ;
                  ;unsigned int step_count =0;
                  ;int speed=0;
-                 ;int acc=70;
+                 ;int acc=100;
                  ;
                  ;void print_speed_acc(){
                  ; 0000 002D void print_speed_acc(){
