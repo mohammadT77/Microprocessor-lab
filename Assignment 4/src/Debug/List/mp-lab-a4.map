@@ -12,10 +12,11 @@ Variable                                                                        
 Register Allocation
 Variable                                                                          Register  Size
 ------------------------------------------------------------------------------------------------
+dir                                                                               R4,R5        2
 
 FLASH Allocation [words]
 Function                                                                          Address   Size
 ------------------------------------------------------------------------------------------------
-timer_procedure                                                                   0x0005F     22
-timer0_ovf_isr                                                                    0x00075     50
-main                                                                              0x000A7     34
+timer_procedure                                                                   0x00067     35
+timer0_ovf_isr                                                                    0x0008A     50
+main                                                                              0x000BC     53

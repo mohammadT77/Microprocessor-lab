@@ -27,21 +27,24 @@ Data Stack size         : 256
 //const char STEPS[4] = {0b00001001,0b00000101,0b00000110,0b00001010};
 const char STEPS[8] = {0b00001001,0b00001000,0b000001010,0b00000010,0b00000110,0b00000100,0b00000101,0b00000001};
 static unsigned int timer_counter = 0;
-static char state = 0;
+static char state = -1;
+short int dir=1;
 
 void timer_procedure(){
-    if (state>=8){
-        state = 0;
-        return;
-    } 
-    if (state<0)
-        return;
-    PORTA = STEPS[state++];
+    if (!dir){ // STOP motor
+        PORTA = 0;
+        return;    
+    }
+    state += dir; 
+    if (state>=8 || state<0)
+        state = dir==1?0:7;
+    PORTA = STEPS[state];
+    
 }
 
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
-    TCNT0=0x83;
+    TCNT0=0x83; 
     timer_counter++;
     if (timer_counter==1000){
         timer_procedure();
@@ -53,7 +56,9 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 void main(void)
 {
 
-DDRA=0x0F;
+char btn_hold = 0;
+
+DDRA=0x1F;
 PORTA = 0x00;
 DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
 DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
@@ -75,15 +80,20 @@ TIMSK=(0<<OCIE2) | (0<<TOIE2) | (0<<TICIE1) | (0<<OCIE1A) | (0<<OCIE1B) | (0<<TO
 #asm("sei")
 
 while (1)
-  {
-      if (!PINC.2){
-        //TCNT0=0x83;
-        //timer_counter=0;            
-        TIMSK=0;
-        delay_ms(5);
-        PORTA = 0;
-        delay_ms(5);
-        TIMSK=1;
+  {        
+      PORTA.4 = (dir==-1?0:1);  
+      
+      if (!btn_hold&&!PINC.2){   
+        btn_hold = 1;      
+        dir *= -1;
+        timer_counter=500;            
+        //TIMSK=0;
+        //delay_ms(5);
+        //PORTA = 0;
+        //delay_ms(5);
+        //TIMSK=1;
+      } else if(PINC.2) {
+        btn_hold=0;
       }
 
   }
